@@ -111,18 +111,18 @@ impl Parser {
                     process::exit(1);
                 }
             }
-            // Flags that do take arguments, check to make sure the option following is correct.
-            else if arg.chars().nth(0) != Some('-') && is_option {
-                let arg_to_lower = arg.to_ascii_lowercase();
-                for option in &current_flag.options {
-                    if arg_to_lower == option.to_ascii_lowercase() {
-                        is_option = false;
-                        continue 'args;
-                    }
-                }
-                println!("Invalid option for -{}...\n{}", current_flag.title, self.help());
-                process::exit(1);
-            }
+            // // Flags that do take arguments, check to make sure the option following is correct.
+            // else if arg.chars().nth(0) != Some('-') && is_option {
+            //     let arg_to_lower = arg.to_ascii_lowercase();
+            //     for option in &current_flag.options {
+            //         if arg_to_lower == option.to_ascii_lowercase() {
+            //             is_option = false;
+            //             continue 'args;
+            //         }
+            //     }
+            //     println!("Invalid option for -{}...\n{}", current_flag.title, self.help());
+            //     process::exit(1);
+            // }
             // Check if an arguemnt is passed in.
             else {
                 for parser_arg in &self.arguments {
