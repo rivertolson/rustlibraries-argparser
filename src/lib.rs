@@ -1,3 +1,6 @@
+use std::env::Args;
+use std::process;
+
 pub struct Parser {
     proj_title: String,
     proj_desc: String,
@@ -9,6 +12,16 @@ pub struct Flag {
     title: String,
     desc: String,
     options: Vec<String>,
+}
+
+impl Flag {
+    pub fn new() -> Flag{
+        Flag {
+            title: String::new(),
+            desc: String::new(),
+            options: Vec::new(),
+        }
+    }
 }
 
 pub struct Argument {
@@ -44,6 +57,82 @@ impl Parser {
         help_msg.push_str(&flag_str);
         help_msg.push_str(&args_str);
         help_msg
+    }
+
+    // parse command
+    pub fn parse(&self, args: &mut Args) {
+        // Parse the arguments
+        args.next();
+
+        let mut is_option = false;
+        let mut current_flag: &Flag = &Flag::new();
+        'args: for arg in args{
+            // First character of arg is '-', meaning it's a flag
+            if arg.chars().nth(0) == Some('-') && !is_option {
+                is_option = true;
+                let arg_to_lower = arg[1..].to_ascii_lowercase();
+                for flag in &self.flags {
+                    if arg_to_lower == *flag.title {
+                        current_flag = flag;
+                        continue 'args;
+                    }
+                }
+                if arg_to_lower == "h" {
+                    println!("{}", self.help());
+                    process::exit(1);
+                }
+                else {
+                    println!("Invalid flag: '{}'...\n{}", arg_to_lower, self.help());
+                    process::exit(1);
+                }
+            }
+            // Flags may only be followed by another flag if they don't take any arguments
+            else if arg.chars().nth(0) == Some('-') && is_option {
+                if current_flag.options.len() == 0 {
+                    is_option = false;
+                    let arg_to_lower = arg[1..].to_ascii_lowercase();
+                    for flag in &self.flags {
+                        if arg_to_lower == *flag.title {
+                            current_flag = flag;
+                            continue 'args;
+                        }
+                    }
+                    if arg_to_lower == "h" {
+                        println!("{}", self.help());
+                        process::exit(1);
+                    }
+                    else {
+                        println!("Invalid flag, '{}'...\n{}", arg_to_lower, self.help());
+                        process::exit(1);
+                    }
+                }
+                else {
+                    println!("-{} requires an option...\n{}", current_flag.title, self.help());
+                    process::exit(1);
+                }
+            }
+            // Flags that do take arguments, check to make sure the option following is correct.
+            else if arg.chars().nth(0) != Some('-') && is_option {
+                let arg_to_lower = arg.to_ascii_lowercase();
+                for option in &current_flag.options {
+                    if arg_to_lower == option.to_ascii_lowercase() {
+                        is_option = false;
+                        continue 'args;
+                    }
+                }
+                println!("Invalid option for -{}...\n{}", current_flag.title, self.help());
+                process::exit(1);
+            }
+            // Check if an arguemnt is passed in.
+            else {
+                for parser_arg in &self.arguments {
+                    if parser_arg.title == arg {
+                        break;
+                    }
+                }
+                println!("Uknown arg: '{}'...\n{}", arg, self.help());
+            }
+        }
     }
 }
 
@@ -81,21 +170,34 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        
+    fn third_flag_is_c() {
         let mut flags: Vec<Flag> = Vec::new();
         flags.push(create_flag("a", "This is the a flag", vec!["some"]));
         flags.push(create_flag("b", "This is the b flag", vec!["some", "thing"]));
         flags.push(create_flag("c", "This is the c flag", vec!["some"]));
-        flags.push(create_flag("d", "This is the d flag", vec!["some"]));
+        flags.push(create_flag("d", "This is the d flag", vec![]));
 
         let mut args: Vec<Argument> = Vec::new();
         args.push(create_arg("foo", "This is the foo argument"));
         args.push(create_arg("bar", "This is the bar argument"));
 
         let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
+        assert_eq!(arg_parser.flags[2].title, "c");
+    }
 
-        println!("{}", arg_parser.help());
-        assert_eq!(true, false);
+    #[test]
+    fn fourth_flag_has_zero_options() {
+        let mut flags: Vec<Flag> = Vec::new();
+        flags.push(create_flag("a", "This is the a flag", vec!["some"]));
+        flags.push(create_flag("b", "This is the b flag", vec!["some", "thing"]));
+        flags.push(create_flag("c", "This is the c flag", vec!["some"]));
+        flags.push(create_flag("d", "This is the d flag", vec![]));
+
+        let mut args: Vec<Argument> = Vec::new();
+        args.push(create_arg("foo", "This is the foo argument"));
+        args.push(create_arg("bar", "This is the bar argument"));
+
+        let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
+        assert_eq!(arg_parser.flags[3].options.len(), 0);
     }
 }
