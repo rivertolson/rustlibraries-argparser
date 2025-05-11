@@ -34,26 +34,31 @@ impl Parser {
     pub fn help(&self) -> String {
         // Get the flags
         let mut flag_str: String = String::new();
-        for flag in &self.flags {
-            flag_str.push_str(&("    -".to_owned() + &flag.title + " "));
-            for option in &flag.options {
-                flag_str.push_str(&("<".to_owned() + option + "> "));
+        if self.flags.len() > 0 {
+            flag_str.push_str(" Options:\n");
+            for flag in &self.flags {
+                flag_str.push_str(&("    -".to_owned() + &flag.title + " "));
+                for option in &flag.options {
+                    flag_str.push_str(&("<".to_owned() + option + "> "));
+                }
+                flag_str.push_str(&(":\n\t ".to_owned() + &flag.desc + "\n"));
             }
-            flag_str.push_str(&(":\n\t ".to_owned() + &flag.desc + "\n"));
+            flag_str.push_str("\n");
         }
-        flag_str.push_str("\n");
-
+        
         // Get the arguments
-        let mut args_str: String = String::from(" Arguments:\n");
-        for arg in &self.arguments {
-            args_str.push_str(&("    ".to_owned() + &arg.title + " :\n\t " + &arg.desc + "\n"));
+        let mut args_str = String::new();
+        if self.arguments.len() > 0 {
+            args_str.push_str(" Arguments:\n");
+            for arg in &self.arguments {
+                args_str.push_str(&("    ".to_owned() + &arg.title + " :\n\t " + &arg.desc + "\n"));
+            }  
         }
-
+        
         // Create the help message
         let mut help_msg = 
             self.proj_title.clone() + ", " + &self.proj_desc.clone() +
-            "\nUsage: -h for help:\n\n \
-            Options:\n";
+            "\nUsage: -h for help:\n\n";
         help_msg.push_str(&flag_str);
         help_msg.push_str(&args_str);
         help_msg
