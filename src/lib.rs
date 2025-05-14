@@ -84,7 +84,7 @@ impl Parser {
                     // Check to make sure the flag hasn't been used already.
                     for used_flag in &used_flags {
                         if arg_to_lower == used_flag.title {
-                            println!("Flags may only be used once, duplicate flag: -{}...\n{}", flag.title, self.help());
+                            println!("Flags may only be used once, duplicate flag: -{}...\n{}", arg_to_lower, self.help());
                             process::exit(1);
                         }
                     }
@@ -112,7 +112,7 @@ impl Parser {
                         // Check to make sure the flag hasn't been used already.
                         for used_flag in &used_flags {
                             if arg_to_lower == used_flag.title {
-                                println!("Flags may only be used once, duplicate flag: -{}...\n{}", flag.title, self.help());
+                                println!("Flags may only be used once, duplicate flag: -{}...\n{}", arg_to_lower, self.help());
                                 process::exit(1);
                             }
                         }
@@ -151,7 +151,7 @@ impl Parser {
                     // Check to make sure the argument hasn't been used already.
                     for used_arg in &used_args {
                         if arg_to_lower == used_arg.title {
-                            println!("Arguments may only be used once, duplicate argument: {}...\n{}", parser_arg.title, self.help());
+                            println!("Arguments may only be used once, duplicate argument: {}...\n{}", arg_to_lower, self.help());
                             process::exit(1);
                         }
                     }
