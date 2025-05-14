@@ -15,8 +15,8 @@ pub struct Flag {
 }
 
 pub struct Options {
-    flags: Vec<(String, String)>,
-    arguments: Vec<String>,
+    pub flags: Vec<(String, String)>,
+    pub arguments: Vec<String>,
 }
 
 impl Flag {
