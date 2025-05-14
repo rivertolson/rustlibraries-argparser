@@ -14,7 +14,7 @@ pub struct Flag {
     options: Vec<String>,
 }
 
-pub struct Options {
+pub struct Arguments {
     pub flags: Vec<(String, String)>,
     pub arguments: Vec<String>,
 }
@@ -70,7 +70,7 @@ impl Parser {
     }
 
     // parse command
-    pub fn parse(&self, args: &mut Args) -> Options {
+    pub fn parse(&self, args: &mut Args) -> Arguments {
         // First argument is the programs path. Skip it.
         args.next();
 
@@ -79,7 +79,7 @@ impl Parser {
         let mut current_flag: &Flag = &Flag::new();
         let mut used_flags: Vec<&Flag> = Vec::new();
         let mut used_args: Vec<&Argument> = Vec::new();
-        let mut options: Options = Options { flags: Vec::new(), arguments: Vec::new() };
+        let mut options: Arguments = Arguments { flags: Vec::new(), arguments: Vec::new() };
 
         'args: for arg in args{
             // First character of arg is '-', meaning it's a flag
