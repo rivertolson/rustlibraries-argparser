@@ -83,7 +83,7 @@ impl Parser {
                 for flag in &self.flags {
                     // Check to make sure the flag hasn't been used already.
                     for used_flag in &used_flags {
-                        if used_flag.title == flag.title {
+                        if arg_to_lower == used_flag.title {
                             println!("Flags may only be used once, duplicate flag: -{}...\n{}", flag.title, self.help());
                             process::exit(1);
                         }
@@ -111,7 +111,7 @@ impl Parser {
                     for flag in &self.flags {
                         // Check to make sure the flag hasn't been used already.
                         for used_flag in &used_flags {
-                            if used_flag.title == flag.title {
+                            if arg_to_lower == used_flag.title {
                                 println!("Flags may only be used once, duplicate flag: -{}...\n{}", flag.title, self.help());
                                 process::exit(1);
                             }
@@ -146,10 +146,11 @@ impl Parser {
             }
             // Check if an arguemnt is passed in.
             else {
+                let arg_to_lower = arg[..].to_ascii_lowercase();
                 for parser_arg in &self.arguments {
                     // Check to make sure the argument hasn't been used already.
                     for used_arg in &used_args {
-                        if used_arg.title == parser_arg.title {
+                        if arg_to_lower == used_arg.title {
                             println!("Arguments may only be used once, duplicate argument: {}...\n{}", parser_arg.title, self.help());
                             process::exit(1);
                         }
