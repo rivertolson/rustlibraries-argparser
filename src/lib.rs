@@ -76,6 +76,7 @@ impl Parser {
 
         // Set up "globals" and return Options
         let mut is_option = false;
+        let mut parsed = false;
         let mut current_flag: &Flag = &Flag::new();
         let mut used_flags: Vec<&Flag> = Vec::new();
         let mut used_args: Vec<&Argument> = Vec::new();
@@ -98,6 +99,7 @@ impl Parser {
                     if arg_to_lower == *flag.title {
                         current_flag = flag;
                         used_flags.push(&flag);
+                        parsed = false;
                         continue 'args;
                     }
                 }
@@ -113,6 +115,7 @@ impl Parser {
             // Flags may only be followed by another flag if they don't take any arguments
             else if arg.chars().nth(0) == Some('-') && is_option {
                 options.flags.push((current_flag.title.clone(), String::new()));
+                // parsed = true;
                 let arg_to_lower = arg[1..].to_ascii_lowercase();
                 for flag in &self.flags {
                     // Check to make sure the flag hasn't been used already.
@@ -125,6 +128,7 @@ impl Parser {
                     if arg_to_lower == *flag.title {
                         current_flag = flag;
                         used_flags.push(&flag);
+                        parsed = false;
                         continue 'args;
                     }
                 }
@@ -145,6 +149,7 @@ impl Parser {
                 }
                 let arg_to_lower = arg[..].to_ascii_lowercase();
                 options.flags.push((current_flag.title.clone(), arg_to_lower));
+                parsed = true;
                 is_option = false;
             }
             // Check if an arguemnt is passed in.
@@ -167,6 +172,9 @@ impl Parser {
                 println!("Uknown arg: '{}'...\n{}", arg, self.help());
                 process::exit(1);
             }
+        }
+        if !parsed {
+            options.flags.push((current_flag.title.clone(), String::new()));
         }
         options
     }
