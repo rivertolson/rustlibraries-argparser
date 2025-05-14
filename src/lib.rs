@@ -14,6 +14,11 @@ pub struct Flag {
     options: Vec<String>,
 }
 
+pub struct Options {
+    flags: Vec<(String, String)>,
+    arguments: Vec<String>,
+}
+
 impl Flag {
     pub fn new() -> Flag{
         Flag {
@@ -65,14 +70,16 @@ impl Parser {
     }
 
     // parse command
-    pub fn parse(&self, args: &mut Args) {
-        // Parse the arguments
+    pub fn parse(&self, args: &mut Args) -> Options {
+        // First argument is the programs path. Skip it.
         args.next();
 
+        // Set up "globals" and return Options
         let mut is_option = false;
         let mut current_flag: &Flag = &Flag::new();
         let mut used_flags: Vec<&Flag> = Vec::new();
         let mut used_args: Vec<&Argument> = Vec::new();
+        let mut options: Options = Options { flags: Vec::new(), arguments: Vec::new() };
 
         'args: for arg in args{
             // First character of arg is '-', meaning it's a flag
@@ -107,6 +114,7 @@ impl Parser {
             else if arg.chars().nth(0) == Some('-') && is_option {
                 // If the current flag doesn't have options, parse it.
                 if current_flag.options.len() == 0 {
+                    options.flags.push((current_flag.title.clone(), String::new()));
                     let arg_to_lower = arg[1..].to_ascii_lowercase();
                     for flag in &self.flags {
                         // Check to make sure the flag hasn't been used already.
@@ -142,6 +150,8 @@ impl Parser {
                     println!("-{} does not take any arguments...\n{}", current_flag.title, self.help());
                     process::exit(1);
                 }
+                let arg_to_lower = arg[..].to_ascii_lowercase();
+                options.flags.push((current_flag.title.clone(), arg_to_lower));
                 is_option = false;
             }
             // Check if an arguemnt is passed in.
@@ -156,6 +166,7 @@ impl Parser {
                         }
                     }
                     if parser_arg.title == arg {
+                        options.arguments.push(parser_arg.title.clone());
                         used_args.push(&parser_arg);
                         break;
                     }
@@ -164,6 +175,7 @@ impl Parser {
                 process::exit(1);
             }
         }
+        options
     }
 }
 
