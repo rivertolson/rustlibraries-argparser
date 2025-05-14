@@ -112,35 +112,28 @@ impl Parser {
             }
             // Flags may only be followed by another flag if they don't take any arguments
             else if arg.chars().nth(0) == Some('-') && is_option {
-                // If the current flag doesn't have options, parse it.
-                if current_flag.options.len() == 0 {
-                    options.flags.push((current_flag.title.clone(), String::new()));
-                    let arg_to_lower = arg[1..].to_ascii_lowercase();
-                    for flag in &self.flags {
-                        // Check to make sure the flag hasn't been used already.
-                        for used_flag in &used_flags {
-                            if arg_to_lower == used_flag.title {
-                                println!("Flags may only be used once, duplicate flag: -{}...\n{}", arg_to_lower, self.help());
-                                process::exit(1);
-                            }
-                        }
-                        if arg_to_lower == *flag.title {
-                            current_flag = flag;
-                            used_flags.push(&flag);
-                            continue 'args;
+                options.flags.push((current_flag.title.clone(), String::new()));
+                let arg_to_lower = arg[1..].to_ascii_lowercase();
+                for flag in &self.flags {
+                    // Check to make sure the flag hasn't been used already.
+                    for used_flag in &used_flags {
+                        if arg_to_lower == used_flag.title {
+                            println!("Flags may only be used once, duplicate flag: -{}...\n{}", arg_to_lower, self.help());
+                            process::exit(1);
                         }
                     }
-                    if arg_to_lower == "h" {
-                        println!("{}", self.help());
-                        process::exit(1);
-                    }
-                    else {
-                        println!("Invalid flag, '{}'...\n{}", arg_to_lower, self.help());
-                        process::exit(1);
+                    if arg_to_lower == *flag.title {
+                        current_flag = flag;
+                        used_flags.push(&flag);
+                        continue 'args;
                     }
                 }
-                else {  // If it does have options, return help function
-                    println!("-{} requires an option...\n{}", current_flag.title, self.help());
+                if arg_to_lower == "h" {
+                    println!("{}", self.help());
+                    process::exit(1);
+                }
+                else {
+                    println!("Invalid flag, '{}'...\n{}", arg_to_lower, self.help());
                     process::exit(1);
                 }
             }
