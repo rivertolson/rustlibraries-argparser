@@ -94,7 +94,6 @@ impl Parser {
             // Flags may only be followed by another flag if they don't take any arguments
             else if arg.chars().nth(0) == Some('-') && is_option {
                 if current_flag.options.len() == 0 {
-                    is_option = false;
                     let arg_to_lower = arg[1..].to_ascii_lowercase();
                     for flag in &self.flags {
                         if arg_to_lower == *flag.title {
