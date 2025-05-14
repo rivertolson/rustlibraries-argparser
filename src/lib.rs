@@ -118,6 +118,10 @@ impl Parser {
             }
             // Flags that do take arguments, check to make sure the option following is correct.
             else if arg.chars().nth(0) != Some('-') && is_option {
+                if current_flag.options.len() == 0 {
+                    println!("-{} does not take any arguments...\n{}", current_flag.title, self.help());
+                    process::exit(1);
+                }
                 is_option = false;
             }
             // Check if an arguemnt is passed in.
