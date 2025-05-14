@@ -163,10 +163,10 @@ impl Parser {
                             process::exit(1);
                         }
                     }
-                    if parser_arg.title == arg {
+                    if parser_arg.title == arg_to_lower {
                         options.arguments.push(parser_arg.title.clone());
                         used_args.push(&parser_arg);
-                        break;
+                        continue 'args;
                     }
                 }
                 println!("Uknown arg: '{}'...\n{}", arg, self.help());
