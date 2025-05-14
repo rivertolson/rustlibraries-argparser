@@ -71,14 +71,26 @@ impl Parser {
 
         let mut is_option = false;
         let mut current_flag: &Flag = &Flag::new();
+        let mut used_flags: Vec<&Flag> = Vec::new();
+        let mut used_args: Vec<&Argument> = Vec::new();
+
         'args: for arg in args{
             // First character of arg is '-', meaning it's a flag
             if arg.chars().nth(0) == Some('-') && !is_option {
+                // Since we are at an option, check is_option to true.
                 is_option = true;
                 let arg_to_lower = arg[1..].to_ascii_lowercase();
                 for flag in &self.flags {
+                    // Check to make sure the flag hasn't been used already.
+                    for used_flag in &used_flags {
+                        if used_flag.title == flag.title {
+                            println!("Flags may only be used once, duplicate flag: -{}...\n{}", flag.title, self.help());
+                            process::exit(1);
+                        }
+                    }
                     if arg_to_lower == *flag.title {
                         current_flag = flag;
+                        used_flags.push(&flag);
                         continue 'args;
                     }
                 }
@@ -93,11 +105,20 @@ impl Parser {
             }
             // Flags may only be followed by another flag if they don't take any arguments
             else if arg.chars().nth(0) == Some('-') && is_option {
+                // If the current flag doesn't have options, parse it.
                 if current_flag.options.len() == 0 {
                     let arg_to_lower = arg[1..].to_ascii_lowercase();
                     for flag in &self.flags {
+                        // Check to make sure the flag hasn't been used already.
+                        for used_flag in &used_flags {
+                            if used_flag.title == flag.title {
+                                println!("Flags may only be used once, duplicate flag: -{}...\n{}", flag.title, self.help());
+                                process::exit(1);
+                            }
+                        }
                         if arg_to_lower == *flag.title {
                             current_flag = flag;
+                            used_flags.push(&flag);
                             continue 'args;
                         }
                     }
@@ -110,7 +131,7 @@ impl Parser {
                         process::exit(1);
                     }
                 }
-                else {
+                else {  // If it does have options, return help function
                     println!("-{} requires an option...\n{}", current_flag.title, self.help());
                     process::exit(1);
                 }
@@ -126,7 +147,15 @@ impl Parser {
             // Check if an arguemnt is passed in.
             else {
                 for parser_arg in &self.arguments {
+                    // Check to make sure the argument hasn't been used already.
+                    for used_arg in &used_args {
+                        if used_arg.title == parser_arg.title {
+                            println!("Arguments may only be used once, duplicate argument: {}...\n{}", parser_arg.title, self.help());
+                            process::exit(1);
+                        }
+                    }
                     if parser_arg.title == arg {
+                        used_args.push(&parser_arg);
                         break;
                     }
                 }
