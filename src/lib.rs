@@ -1,6 +1,72 @@
+//! # argparser
+//! 
+//! This crate will parse flags and arguments that are
+//! passed into a Rust program. This crate will not 
+//! handle all the logic associated with the flags
+//! and arguments as that is program specific. It will
+//! check and validate that the flags and arguments
+//! passed in are valid.
+//! 
+//! ## Features
+//! - Creates a parser with a set of flags and arguments
+//! which will check and validate options passed in when
+//! running the program.
+//! - Creates a custom help function for all the arguments
+//! and flags
+//! - Will stop the program if the arguments passed in are
+//! not valid.
+//! 
+//! ## Examples
+//! ``` rust
+//! use argparser::*;
+//! 
+//! fn main() {
+//!     let mut flags: Vec<Flag> = Vec::new();
+//!     flags.push(create_flag("a", "This is the a flag", vec!["some"]));
+//!     flags.push(create_flag("b", "This is the b flag", vec!["some", "thing"]));
+//!     flags.push(create_flag("c", "This is the c flag", vec!["some"]));
+//!     flags.push(create_flag("d", "This is the d flag", vec![]));
+//!
+//!     let mut args: Vec<Argument> = Vec::new();
+//!     args.push(create_arg("foo", "This is the foo argument"));
+//!     args.push(create_arg("bar", "This is the bar argument"));
+//!
+//!     let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
+//! }
+//! ```
+//! 
+//! calling `arg_parser.help()` will generate the following:
+//! 
+//! ``` txt
+//! Test Parser, Tests arguments
+//! Usage: -h for help:
+//!
+//! Options:
+//!    -a <some> :
+//!	        This is the a flag
+//!    -b <some> <thing> :
+//!	        This is the b flag
+//!    -c <some> :
+//!     	 This is the c flag
+//!    -d :
+//!	        This is the d flag
+//!
+//! Arguments:
+//!    foo :
+//!     	 This is the foo argument
+//!    bar :
+//!     	 This is the bar argument
+//! ```
+//! 
+//! ## Modules
+//! Args: essential for parsing arguments.
+//! Process: used for ending the program early when an error occurs.
+
 use std::env::Args;
 use std::process;
 
+/// A parser. This is responsible for the help function
+/// as well as handeling argument logic.
 pub struct Parser {
     proj_title: String,
     proj_desc: String,
@@ -226,7 +292,9 @@ mod tests {
         args.push(create_arg("bar", "This is the bar argument"));
 
         let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
-        assert_eq!(arg_parser.flags[2].title, "c");
+        println!("{}", arg_parser.help());
+        // assert_eq!(arg_parser.flags[2].title, "c");
+        assert_eq!(true, false);
     }
 
     #[test]
