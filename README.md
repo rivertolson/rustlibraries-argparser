@@ -86,11 +86,11 @@ The Flags, Arguments, and Parser can be more easily created by using the `create
 
 The parser takes the Flags and Arguments as Vectors and creates a parser. This parser contains the `help` and `parse` functions.
 
-- `help` will call the custom help function that is create when the Parser is created.
-- `parse` will take the the arguments passed in, and attempt to parse them. If the arguments cannot be parsed (as defined below), the help message will be displayed, and the program will be terminated. Otherwise, the parsed arguments will be return for further processing.
+- `help` will call the custom help function that is created when the Parser is created.
+- `parse` will take the arguments passed in, and attempt to parse them. If the arguments cannot be parsed (as defined below), the help message will be displayed, and the program will be terminated. Otherwise, the parsed arguments will be returned for further processing.
 
 ### The `parse` Function
-The Parser's `parse` function takes the arguments that are pass in when calling the program.
+The Parser's `parse` function takes the arguments that are passed in when calling the program.
 
 ``` rust
 let parsed_args: ParsedArgs = arg_parser.parse(&mut std::env::args());
@@ -105,7 +105,7 @@ pub struct ParsedArgs {
 }
 ```
 
-In the vector of String tuples in the flags the first String is a Flag title, and the second String is the option that was passed with the flag. For example, passing the a flag with the option 3 into a program called program_name such as:
+In the vector of String tuples in the flags the first String is a Flag title, and the second String is the option that was passed with the flag. For example, passing the `a` flag with the option `3` into a program called program_name such as:
 
 `program_name -a 3`
 
@@ -113,17 +113,17 @@ The vector of String tuples will contain the following:
 
 `[("a", "3")]`
 
-The purpose of ParsedArgs is to assist in further logic parsing of the flags and arguments. It is possible that the second String in the tuple is empty, as flags are not required to take options. In this case, the second String will be `""`.
+The purpose of ParsedArgs is to assist in further logic processing of the flags and arguments. It is possible that the second String in the tuple is empty, as flags are not required to take options. In this case, the second String will be `""`.
 
 ## Rules for the parser
-- Flags and and arguments/commands can only be used once.
+- Flags and arguments/commands can only be used once.
 - Flags that do take options can only take one option.
-- Cannot pass in flags or arguments/commands that aren't already specified.
+- Cannot pass in flags or arguments/commands that weren't created with the Parser.
 
 The parser will display the help function and end the program if the arguments passes in do not follow the rules.
 
 The following examples will not work:
 
 - `program_name -a -a`
-- `program_name -a option1 option2` (option2 will be treated like an argument/command)
-- `program_name -b` (Only if the -b flag wasn't specified before) 
+- `program_name -a option1 option2` (option2 will be treated like an argument/command, not an option for the `-a` flag)
+- `program_name -b` (Only if the -b flag wasn't created with the parser) 
