@@ -67,41 +67,169 @@ use std::process;
 
 /// A parser. This is responsible for the help function
 /// as well as handeling argument logic.
+/// 
+/// # Examples
+/// ``` rust
+/// use argparser::*
+/// 
+/// fn main() {
+///     let mut flags: Vec<Flag> = Vec::new();
+///     flags.push(create_flag("a", "This is the a flag", vec!["some"]));
+///     flags.push(create_flag("b", "This is the b flag", vec!["some", "thing"]));
+///     flags.push(create_flag("c", "This is the c flag", vec!["some"]));
+///     flags.push(create_flag("d", "This is the d flag", vec![]));
+/// 
+///     let mut args: Vec<Argument> = Vec::new();
+///     args.push(create_arg("foo", "This is the foo argument"));
+///     args.push(create_arg("bar", "This is the bar argument"));
+/// 
+///     let parser: Parser = Parser {
+///         project_title: "Project Name",
+///         project_description: "Project Description",
+///         flags: flags,
+///         arguments: args,
+///     }
+/// }
+/// ```
 pub struct Parser {
-    proj_title: String,
-    proj_desc: String,
+    project_title: String,
+    project_description: String,
     flags: Vec<Flag>,
     arguments: Vec<Argument>
 }
 
+/// A flag structure meant to be passed to the flags vec in a Parser.
+/// 
+/// # Examples
+/// ``` rust
+/// use argparser::*;
+/// 
+/// fn main() {
+///     let a_flag: Flag = Flag {
+///         title: "a",
+///         description: "The a flag",
+///         options: vec!["option".to_string()],
+///     }
+/// }
+/// ```
 pub struct Flag {
     title: String,
-    desc: String,
+    description: String,
     options: Vec<String>,
 }
 
+/// A collection of the flags, and associated options, as well as
+/// the arguments that come from the parser.parse() function.
+/// 
+/// # Examples
+/// ``` rust
+/// use argparser::*;
+/// 
+/// fn main() {
+///     let mut flags: Vec<Flag> = Vec::new();
+///     flags.push(create_flag("a", "This is the a flag", vec!["some"]));
+///     flags.push(create_flag("b", "This is the b flag", vec!["some", "thing"]));
+///     flags.push(create_flag("c", "This is the c flag", vec!["some"]));
+///     flags.push(create_flag("d", "This is the d flag", vec![]));
+/// 
+///     let mut args: Vec<Argument> = Vec::new();
+///     args.push(create_arg("foo", "This is the foo argument"));
+///     args.push(create_arg("bar", "This is the bar argument"));
+/// 
+///     let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
+/// 
+///     let parsed_args: ParsedArgs = arg_parser.parse();
+/// }
+/// ```
 pub struct ParsedArgs {
     pub flags: Vec<(String, String)>,
     pub arguments: Vec<String>,
 }
 
 impl Flag {
+    /// Creates a new and empty flag to be edited further.
+    /// 
+    /// # Examples
+    /// ``` rust
+    /// use argparser::*;
+    /// 
+    /// fn main() {
+    ///     let new_flag: Flag = Flag::new();
+    /// }
+    /// ```
     pub fn new() -> Flag{
         Flag {
             title: String::new(),
-            desc: String::new(),
+            description: String::new(),
             options: Vec::new(),
         }
     }
 }
 
+/// A flag structure meant to be passed to the flags vec in a Parser.
+/// 
+/// # Example
+/// ``` rust
+/// use argparser::*;
+/// 
+/// fn main() {
+///     let arg1: Argument = Argument {
+///         title: "argument",
+///         description: "The description for the argument",
+///     }
+/// }
+/// ```
 pub struct Argument {
     title: String,
-    desc: String
+    description: String
 }
 
 impl Parser {
-    // help command
+    /// The help command for the Parser. Comes with a custom help
+    /// function that can be called on a parser, and will get called
+    /// if arguments passed into the program are invalid.
+    /// 
+    /// # Examples
+    /// ``` rust
+    /// use argparser::*;
+    /// 
+    /// fn main() {
+    ///     let mut flags: Vec<Flag> = Vec::new();
+    ///     flags.push(create_flag("a", "This is the a flag", vec!["some"]));
+    ///     flags.push(create_flag("b", "This is the b flag", vec!["some", "thing"]));
+    ///     flags.push(create_flag("c", "This is the c flag", vec!["some"]));
+    ///     flags.push(create_flag("d", "This is the d flag", vec![]));
+    ///
+    ///     let mut args: Vec<Argument> = Vec::new();
+    ///     args.push(create_arg("foo", "This is the foo argument"));
+    ///     args.push(create_arg("bar", "This is the bar argument"));
+    ///
+    ///     let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
+    /// }
+    /// ```
+    /// 
+    /// calling `arg_parser.help()` will generate the following:
+    /// 
+    /// ``` txt
+    /// Test Parser, Tests arguments
+    /// Usage: -h for help:
+    ///
+    /// Options:
+    ///    -a <some> :
+    ///	        This is the a flag
+    ///    -b <some> <thing> :
+    ///	        This is the b flag
+    ///    -c <some> :
+    ///     	 This is the c flag
+    ///    -d :
+    ///	        This is the d flag
+    ///
+    /// Arguments:
+    ///    foo :
+    ///     	 This is the foo argument
+    ///    bar :
+    ///     	 This is the bar argument
+    /// ```
     pub fn help(&self) -> String {
         // Get the flags
         let mut flag_str: String = String::new();
@@ -112,7 +240,7 @@ impl Parser {
                 for option in &flag.options {
                     flag_str.push_str(&("<".to_owned() + option + "> "));
                 }
-                flag_str.push_str(&(":\n\t ".to_owned() + &flag.desc + "\n"));
+                flag_str.push_str(&(":\n\t ".to_owned() + &flag.description + "\n"));
             }
             flag_str.push_str("\n");
         }
@@ -122,20 +250,50 @@ impl Parser {
         if self.arguments.len() > 0 {
             args_str.push_str(" Arguments:\n");
             for arg in &self.arguments {
-                args_str.push_str(&("    ".to_owned() + &arg.title + " :\n\t " + &arg.desc + "\n"));
+                args_str.push_str(&("    ".to_owned() + &arg.title + " :\n\t " + &arg.description + "\n"));
             }  
         }
         
         // Create the help message
         let mut help_msg = 
-            self.proj_title.clone() + ", " + &self.proj_desc.clone() +
+            self.project_title.clone() + ", " + &self.project_description.clone() +
             "\nUsage: -h for help:\n\n";
         help_msg.push_str(&flag_str);
         help_msg.push_str(&args_str);
         help_msg
     }
 
-    // parse command
+    /// Parses the arguemnts that are passed into the program by
+    /// comparing them to the Parser arguments. If the parsing
+    /// fails then the program terminates. If the parsing is
+    /// successful, then it returns the parsed args.
+    /// 
+    /// # Arguments
+    /// - args: &mut Args
+    /// 
+    /// # Returns
+    /// ParsedArgs
+    /// 
+    /// # Examples
+    /// ``` rust
+    /// use argparser::*;
+    /// 
+    /// fn main() {
+    ///     let mut flags: Vec<Flag> = Vec::new();
+    ///     flags.push(create_flag("a", "This is the a flag", vec!["some"]));
+    ///     flags.push(create_flag("b", "This is the b flag", vec!["some", "thing"]));
+    ///     flags.push(create_flag("c", "This is the c flag", vec!["some"]));
+    ///     flags.push(create_flag("d", "This is the d flag", vec![]));
+    ///
+    ///     let mut args: Vec<Argument> = Vec::new();
+    ///     args.push(create_arg("foo", "This is the foo argument"));
+    ///     args.push(create_arg("bar", "This is the bar argument"));
+    ///
+    ///     let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
+    /// 
+    ///     let parsed_args: ParsedArgs = arg_parser.parse();
+    /// }
+    /// ```
     pub fn parse(&self, args: &mut Args) -> ParsedArgs {
         // First argument is the programs path. Skip it.
         args.next();
@@ -246,30 +404,95 @@ impl Parser {
     }
 }
 
-pub fn create_flag(title: &str, desc: &str, options: Vec<&str>) -> Flag {
+/// Creates a Flag which contains a title, descriptions, and the options that it takes.
+/// 
+/// # Arguments
+/// - title: &str
+/// - description: &str
+/// - options: Vec<&str>
+/// 
+/// # Returns
+/// Flag
+/// 
+/// # Examples
+/// ``` rust
+/// use argparser::*;
+/// 
+/// fn main() {
+///     let a_flag: Flag = create_flag("a", "This is the a flag", vec!["option"]);
+/// }
+/// ```
+pub fn create_flag(title: &str, description: &str, options: Vec<&str>) -> Flag {
     let mut return_vec: Vec<String> = Vec::new();
     for option in options {
         return_vec.push(option.to_string());
     }
     Flag {
         title: title.to_string(),
-        desc: desc.to_string(),
+        description: description.to_string(),
         options: return_vec,
     }
 }
 
-pub fn create_arg(title: &str, desc: &str) -> Argument {
-    Argument { title: title.to_string(), desc: desc.to_string() }
+/// Creates an Arguemnt that contains a title and description.
+/// 
+/// # Arguments
+/// - title: &str
+/// - description: &str
+/// 
+/// # Returns
+/// Argument
+/// 
+/// # Examples
+/// ``` rust
+/// use argparser::*;
+/// 
+/// fn main() {
+///     let arg1: Argument = create_arg("argument", "This is an argument");
+/// }
+/// ```
+pub fn create_arg(title: &str, description: &str) -> Argument {
+    Argument { title: title.to_string(), description: description.to_string() }
 }
 
+/// Creates the Parser which contains the custom help function and the
+/// parse function.
+/// 
+/// # Arguments
+/// - project_title: &str
+/// - project_description: &str
+/// - flags: Vec<Flag>
+/// - arguments: Vec<Argument>
+/// 
+/// # Returns
+/// Parser
+/// 
+/// # Examples
+/// ``` rust
+/// use argparser::*;
+/// 
+/// fn main() {
+///     let mut flags: Vec<Flag> = Vec::new();
+///     flags.push(create_flag("a", "This is the a flag", vec!["some"]));
+///     flags.push(create_flag("b", "This is the b flag", vec!["some", "thing"]));
+///     flags.push(create_flag("c", "This is the c flag", vec!["some"]));
+///     flags.push(create_flag("d", "This is the d flag", vec![]));
+///
+///     let mut args: Vec<Argument> = Vec::new();
+///     args.push(create_arg("foo", "This is the foo argument"));
+///     args.push(create_arg("bar", "This is the bar argument"));
+///
+///     let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
+/// }
+/// ```
 pub fn create_parser(
     project_title: &str,
     project_description: &str,
     flags: Vec<Flag>,
     arguments: Vec<Argument> ) -> Parser {
         Parser {
-            proj_title: project_title.to_string(),
-            proj_desc: project_description.to_string(),
+            project_title: project_title.to_string(),
+            project_description: project_description.to_string(),
             flags: flags,
             arguments: arguments,
         }
