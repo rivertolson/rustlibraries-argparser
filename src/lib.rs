@@ -95,7 +95,7 @@ pub struct Parser {
     project_title: String,
     project_description: String,
     flags: Vec<Flag>,
-    arguments: Vec<Argument>
+    arguments: Vec<Argument>,
 }
 
 /// A flag structure meant to be passed to the flags vec in a Parser.
@@ -138,7 +138,7 @@ pub struct Flag {
 /// 
 ///     let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
 /// 
-///     let parsed_args: ParsedArgs = arg_parser.parse();
+///     let parsed_args: ParsedArgs = arg_parser.parse(&mut std::env::args());
 /// }
 /// ```
 pub struct ParsedArgs {
@@ -181,7 +181,26 @@ impl Flag {
 /// ```
 pub struct Argument {
     title: String,
-    description: String
+    description: String,
+}
+
+impl Argument {
+    /// Creates a new and empty argument to be edited further.
+    /// 
+    /// # Examples
+    /// ``` rust
+    /// use argparser::*;
+    /// 
+    /// fn main() {
+    ///     let new_argument: Argument = Argument::new();
+    /// }
+    /// ```
+    pub fn new() -> Argument{
+        Argument {
+            title: String::new(),
+            description: String::new(),
+        }
+    }
 }
 
 impl Parser {
@@ -291,7 +310,7 @@ impl Parser {
     ///
     ///     let arg_parser = create_parser("Test Parser", "Tests arguments", flags, args);
     /// 
-    ///     let parsed_args: ParsedArgs = arg_parser.parse();
+    ///     let parsed_args: ParsedArgs = arg_parser.parse(&mut std::env::args());
     /// }
     /// ```
     pub fn parse(&self, args: &mut Args) -> ParsedArgs {
